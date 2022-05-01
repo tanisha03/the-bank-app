@@ -9,6 +9,9 @@ export default function EmptyState() {
           text-align: center;
           font-size: ${props => props.theme.fontSizes[6]}
       }
+      img {
+        text-align: center;
+      }
   `;
 
   return (
