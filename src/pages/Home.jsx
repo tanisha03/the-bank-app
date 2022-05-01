@@ -90,6 +90,10 @@ export default function Home() {
         setListedBreweries(searchedBreweries.slice(0, listedBreweries.length + NUMBER_OF_ITEMS));
     };
 
+    const showLoadMore = () => {
+        return (!isLoading && listedBreweries.length>0 && searchedBreweries.length!==listedBreweries.length)
+    };
+
     useEffect(() => {
         const params = searchParams.get('search');
         params && fetchResults(params);
@@ -107,10 +111,10 @@ export default function Home() {
         <div>
             { isLoading ? <Spinner/> : (
                 listedBreweries.length ? listedBreweries.map((brewery,i) => (
-                    <BreweryListItem onClick={() => handleItemClick(brewery.id)} name={brewery.name} index={i+1} />
+                    <BreweryListItem onClick={() => handleItemClick(brewery.id)} name={brewery.name} index={i+1} key={i}/>
                 )) : <EmptyState />
             )}
-            { (!isLoading && listedBreweries.length>0 && listedBreweries!==searchedBreweries) && <StyledLink onClick={handleLoadMore}>{'+ Load More..'}</StyledLink> }
+            { showLoadMore() && <StyledLink onClick={handleLoadMore}>{'+ Load More..'}</StyledLink> }
         </div>
     </MainContainer>
   )
