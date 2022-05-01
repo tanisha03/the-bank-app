@@ -11,7 +11,7 @@ Use basic [git](https://services.github.com/on-demand/downloads/github-git-cheat
 ```bash
 git clone https://github.com/tanisha03/brew-it.git
 ```
-Navigate to the required directory using ```cd```, install [node](https://nodejs.org/en/), node packages, and run the server.
+Navigate to the required directory using ```cd```, install node packages, and run the server.
 ```bash
 npm install
 npm start
