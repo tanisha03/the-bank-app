@@ -10,6 +10,7 @@ import { ReactComponent as BackArrow } from '../assets/icons/backArrow.svg';
 const MainContainer = styled.div`
     width: fit-content;
     margin: auto;
+    width: 476px;
 `;
 
 export default function Brewery() {
@@ -29,7 +30,7 @@ export default function Brewery() {
         <IconButton onClick={() => navigate(-1)}>
           <BackArrow/>
         </IconButton>
-        <div style={{minWidth: '376px'}}>
+        <div>
           { breweryData ? <BreweryData details={breweryData} /> : <Spinner /> }
         </div>
       </MainContainer>

@@ -5,8 +5,10 @@ const ListWrapper = styled.div`
     background: ${props => props.theme.colors.secondary.grey};
     cursor: pointer;
     margin-bottom: ${props => props.theme.space[2]};
-    padding: ${props => props.theme.space[4]} ${props => props.theme.space[3]};
+    padding: ${props => props.theme.space[3]} ${props => props.theme.space[2]};
     border-radius: ${props => props.theme.radii[2]};
+    display: flex;
+    align-items: center;
     #counter {
         background: ${props => props.theme.colors.secondary.darkGrey};
         color: ${props => props.theme.colors.primary.light};
