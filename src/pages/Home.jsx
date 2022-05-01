@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import styled from 'styled-components'
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { debouncedFunction  } from '../utils/helpers';
@@ -56,7 +56,7 @@ export default function Home() {
     const [listedBreweries, setListedBreweries] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    const fetchResults = (searchQuery) => {
+    const fetchResults = async (searchQuery) => {
         const itemParams = searchParams.get('items');
         API.searchBreweries(searchQuery)
         .then(res => {
@@ -71,12 +71,15 @@ export default function Home() {
         setSearchQuery(e.target.value);
     }
 
-    const handleOnKeyUp = debouncedFunction((e) => {
+    const handleOnKeyUp = useCallback(debouncedFunction((e) => {
         let searchedValue = e.target.value;
-        setIsLoading(true);
-        searchParams.set('items', 5);
-        fetchResults(searchedValue);
-    }, DEBOUNCED_TIME);
+        if(searchedValue) {
+            setIsLoading(true);
+            searchParams.set('items', 5);
+            fetchResults(searchedValue);
+        }
+        else setListedBreweries([]);
+    }, DEBOUNCED_TIME), []);
 
     const handleItemClick = (id) => {
         setSearchParams({search: searchQuery, items: listedBreweries.length});
@@ -105,10 +108,9 @@ export default function Home() {
             { isLoading ? <Spinner/> : (
                 listedBreweries.length ? listedBreweries.map((brewery,i) => (
                     <BreweryListItem onClick={() => handleItemClick(brewery.id)} name={brewery.name} index={i+1} />
-                    // <div onClick={() => handleItemClick(brewery.id)}>{brewery.name}</div>
                 )) : <EmptyState />
             )}
-            { (!isLoading && listedBreweries.length>0) && <StyledLink onClick={handleLoadMore}>{'+ Load More..'}</StyledLink> }
+            { (!isLoading && listedBreweries.length>0 && listedBreweries!==searchedBreweries) && <StyledLink onClick={handleLoadMore}>{'+ Load More..'}</StyledLink> }
         </div>
     </MainContainer>
   )
