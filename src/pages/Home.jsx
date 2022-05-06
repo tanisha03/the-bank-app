@@ -1,21 +1,21 @@
 import React, {useState, useEffect, useCallback} from 'react'
 import styled from 'styled-components'
-import { useSearchParams, useNavigate } from "react-router-dom";
 import { debouncedFunction  } from '../utils/helpers';
 import * as API from '../utils/http/api';
 import Spinner from '../components/Spinner';
 import DashImage from '../assets/images/dash.png';
+import Input from '../components/Input';
+import { CITIES, CATEGORY, COLUMNS } from '../configs/constants';
+import Table from '../components/Table';
+import StyledSelect from '../components/StyledSelect';
+import Pagination from '../components/Pagination';
 import EmptyState from '../components/EmptyState';
-import StyledLink from '../components/StyledLink';
-import BreweryListItem from '../components/BreweryListItem';
-
-const MainContainer = styled.div`
-    width: fit-content;
-    margin: auto;
-`;
 
 const HeroContainer = styled.div`
   margin-bottom: ${props => props.theme.space[4]};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   h1 {
       font-size: ${props => props.theme.fontSizes[7]};
   }
@@ -29,93 +29,132 @@ const HeroContainer = styled.div`
   }
 `;
 
-const StyledInput = styled.input`
-    width:100%;
-    border:2px solid #aaa;
-    border-radius: ${props => props.theme.radii[2]};
-    margin:8px 0;
-    outline:none;
-    padding: ${props => props.theme.space[3]};
-    box-sizing:border-box;
-    transition:.3s;
-    font-size: ${props => props.theme.fontSizes[4]};
-    &:hover {
-        border-color: #4A83EE;
-        box-shadow:0 0 8px 0 #4A83EE;
-    }
-`;
-
 const DEBOUNCED_TIME = 1000;
-const NUMBER_OF_ITEMS = 5;
-
+const CACHE_MINUTES = 40;
+  
 export default function Home() {
-    let [searchParams, setSearchParams] = useSearchParams();
-    const navigate = useNavigate();
-    const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
-    const [searchedBreweries, setSearchedBreweries] = useState([]);
-    const [listedBreweries, setListedBreweries] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+ const [selectedCity, setSelectedCity] = useState('DELHI');
+ const [selectedCategory, setSelectedCategory] = useState('IFSC');
+ const [banksData, setBanksData] = useState([]);
+ const [displayedBankData, setDisplayedBankData] = useState([]);
+ const [isLoading, setIsLoading] = useState(false);
+ const [searchQuery, setSearchQuery] = useState('');
+ const [currentPage, setCurrentPage] = useState(1);
+ const [minPageLimit, setMinPageLimit] = useState(0);
+ const [maxPageLimit, setMaxPageLimit] = useState(10);
+ const [maxRows, setMaxRows] = useState(10);
+ const pageNumberLimit = 5;
 
-    const fetchResults = async (searchQuery) => {
-        const itemParams = searchParams.get('items');
-        API.searchBreweries(searchQuery)
-        .then(res => {
-            setIsLoading(false);
-            setSearchedBreweries(res);
-            itemParams ? setListedBreweries(res.slice(0, itemParams)) : res.length < 5 ? setListedBreweries(res) : setListedBreweries(res.slice(0, NUMBER_OF_ITEMS));
-        })
-        .catch(err => console.log(err));
+ const fetchResults = async (isCached, city, category, query) => {
+    !isCached && setIsLoading(true);
+    API.getBanks(city, category, query)
+    .then(res => {
+        const slicedRows = res.slice(0, maxRows);
+        setBanksData(res);
+        setDisplayedBankData(slicedRows);
+        isCached && localStorage.setItem(city, JSON.stringify(slicedRows));
+        setCurrentPage(1);
+        setIsLoading(false);
+    })
+    .catch(err => console.error(err))
+ }
+
+ useEffect(() => {
+    const oldTimestamp = JSON.parse(localStorage.getItem('timestamp'));
+    const newTimestamp = new Date().getTime().toString();
+    const difference = (newTimestamp - oldTimestamp)/1000/60;
+    if(difference > CACHE_MINUTES) {
+        CITIES.map(city => localStorage.removeItem(city.value));
+        localStorage.setItem('timestamp', new Date().getTime());
+        setIsLoading(true);
     }
+  }, []);
 
-    const handleChange = (e) => {
-        setSearchQuery(e.target.value);
+ useEffect(() => {
+    const cachedData = localStorage.getItem(selectedCity);
+    cachedData && setDisplayedBankData(JSON.parse(cachedData));
+    fetchResults(true, selectedCity);
+ }, [selectedCity]);
+
+ const handleChange = (e) => {
+    setSearchQuery(e.target.value);
+}
+
+ const handleOnKeyUp = useCallback(debouncedFunction((e) => {
+    let searchedValue = e.target.value;
+    if(searchedValue) {
+        fetchResults(false, selectedCity, selectedCategory, searchedValue);
     }
+}, DEBOUNCED_TIME), []);
 
-    const handleOnKeyUp = useCallback(debouncedFunction((e) => {
-        let searchedValue = e.target.value;
-        if(searchedValue) {
-            setIsLoading(true);
-            searchParams.set('items', 5);
-            fetchResults(searchedValue);
-        }
-        else setListedBreweries([]);
-    }, DEBOUNCED_TIME), []);
+const handleOnKeyUpRows = useCallback(debouncedFunction((e) => {
+    let rowsValue = parseInt(e.target.value);
+    debugger
+    if(rowsValue < banksData.length) {
+        setDisplayedBankData(banksData.slice(0, rowsValue));
+        setCurrentPage(1);
+        setMaxRows(rowsValue);
+    }
+}, DEBOUNCED_TIME), []);
 
-    const handleItemClick = (id) => {
-        setSearchParams({search: searchQuery, items: listedBreweries.length});
-        navigate(`/${id}`);
-    };
+const handleOnPrevClick = () => {
+    if((currentPage-1) % pageNumberLimit === 0){
+        setMaxPageLimit(maxPageLimit - pageNumberLimit);
+        setMinPageLimit(minPageLimit - pageNumberLimit);
+    }
+    const startIndex = (currentPage-1)*maxRows;
+    setDisplayedBankData(banksData.slice(startIndex, startIndex+maxRows));
+    setCurrentPage(currentPage-1);
+}
 
-    const handleLoadMore = () => {
-        setListedBreweries(searchedBreweries.slice(0, listedBreweries.length + NUMBER_OF_ITEMS));
-    };
+const handleOnNextClick = () => {
+    if(currentPage+1 > maxPageLimit){
+        setMaxPageLimit(maxPageLimit + pageNumberLimit);
+        setMinPageLimit(minPageLimit + pageNumberLimit);
+    }
+    const startIndex = (currentPage)*maxRows;
+    setDisplayedBankData(banksData.slice(startIndex, startIndex+maxRows));
+    setCurrentPage(currentPage+1);
+}
 
-    const showLoadMore = () => {
-        return (!isLoading && listedBreweries.length>0 && searchedBreweries.length!==listedBreweries.length)
-    };
+const handleOnPageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+}
 
-    useEffect(() => {
-        const params = searchParams.get('search');
-        params && fetchResults(params);
-    }, []);
-
-  return (
-    <MainContainer>
+ return (
+    <>
         <HeroContainer>
             <div>
-                <h1>Find the pitcher perfect brewery</h1>
+                <h1>Search the bank</h1>
                 <img src={DashImage} alt="" />
             </div>
-            <StyledInput value={searchQuery} onChange={handleChange} onKeyUp={handleOnKeyUp}/>
+            <div>
+                <StyledSelect options={CITIES} name="Cities" id="cities" onChange={(e) => setSelectedCity(e.target.value)}/>
+                <StyledSelect options={CATEGORY} name="category" onChange={(e) => setSelectedCategory(e.target.value)}/>
+                <Input value={searchQuery} onChange={handleChange} onKeyUp={handleOnKeyUp}/>
+            </div>
         </HeroContainer>
-        <div>
-            { isLoading ? <Spinner/> : (
-                listedBreweries.length ? listedBreweries.map((brewery,i) => (
-                    <BreweryListItem onClick={() => handleItemClick(brewery.id)} name={brewery.name} index={i+1} key={i}/>
-                )) : <EmptyState />
-            )}
-            { showLoadMore() && <StyledLink onClick={handleLoadMore}>{'+ Load More..'}</StyledLink> }
-        </div>
-    </MainContainer>
+       {  
+         isLoading ? <Spinner/> : 
+           ( displayedBankData.length ? (
+           <>
+                <Table columns={COLUMNS} data={displayedBankData} />
+                <div style={{marginTop: '16px', float: 'right'}}>
+                    <div>
+                        Rows: <input type="number" value={maxRows} onChange={e => setMaxRows(parseInt(e.target.value))} onKeyUp={handleOnKeyUpRows}/>
+                    </div>
+                    <Pagination 
+                        currentPage={currentPage} 
+                        maxPageLimit={maxPageLimit} 
+                        minPageLimit={minPageLimit} 
+                        totalPages={parseInt(banksData.length/maxRows)}
+                        onPrevClick={handleOnPrevClick} 
+                        onNextClick={handleOnNextClick}
+                        onPageChange={handleOnPageChange}
+                    />
+                </div>
+           </>
+        ) : ( <EmptyState/> ))}
+    </>
   )
 }

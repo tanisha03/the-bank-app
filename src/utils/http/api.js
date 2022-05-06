@@ -1,16 +1,9 @@
 import { service } from "./fetch";
 import ENDPOINTS from "./endpoint";
 
-export function searchBreweries(searchQuery) {
+export function getBanks(cityName, category, value) {
     return service
-      .get(ENDPOINTS.searchBreweries(searchQuery))
+      .get(ENDPOINTS.getBanks(cityName, category, value))
       .then(res => res.data)
       .catch(err => err);
 };
-
-export function getBrewery(id) {
-    return service
-        .get(ENDPOINTS.getBrewery(id))
-        .then(res => res.data)
-        .catch(err => err);
-}
