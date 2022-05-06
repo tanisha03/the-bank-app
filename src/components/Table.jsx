@@ -41,6 +41,7 @@ const Row = (props) => {
 )};
 
 export default function Table({columns, data}) {
+  console.log(data);
   return (
     <TableContainer>
         <tr>

@@ -49,11 +49,11 @@ export default function Home() {
     !isCached && setIsLoading(true);
     API.getBanks(city, category, query)
     .then(res => {
-        const slicedRows = JSON.stringify(res.slice(0, maxRows));
+        const slicedRows = res.slice(0, maxRows);
         const cachedData = localStorage.getItem(city);
         setBanksData(res);
         // check if the data is stale & then refresh
-        if(slicedRows!==cachedData) {
+        if(JSON.stringify(slicedRows)!==cachedData) {
             setDisplayedBankData(slicedRows);
             localStorage.setItem(city, JSON.stringify(slicedRows));
         }
