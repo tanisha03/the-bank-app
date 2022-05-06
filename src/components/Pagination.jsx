@@ -3,15 +3,19 @@ import styled from "styled-components";
 const PageList = styled.ul`
     list-style: none;
     display: flex;
+    padding: ${props => props.theme.space[2]};
     li{
-        padding: 10px;
+        padding: ${props => props.theme.space[2]};
         border: 1px solid white;
         button {
-            background-color: transparent;
             border: none;
             color: black;
             font-size: 1.2rem;
+            padding: 0 ${props => props.theme.space[2]};
             cursor:pointer;
+            &:disabled {
+                display: none;
+            }
         }
     }
     .active {
