@@ -50,6 +50,7 @@ export default function Home() {
     API.getBanks(city, category, query)
     .then(res => {
         const slicedRows = res.slice(0, maxRows);
+        debugger
         setBanksData(res);
         setDisplayedBankData(slicedRows);
         localStorage.setItem(city, JSON.stringify(slicedRows));
@@ -87,15 +88,14 @@ export default function Home() {
     }
 }, DEBOUNCED_TIME), []);
 
-const handleOnKeyUpRows = useCallback(debouncedFunction((e) => {
+const handleOnKeyUpRows = debouncedFunction((e) => {
     let rowsValue = parseInt(e.target.value);
-    debugger
-    if(rowsValue < banksData.length) {
+    if(rowsValue && rowsValue < banksData.length) {
         setDisplayedBankData(banksData.slice(0, rowsValue));
         setCurrentPage(1);
         setMaxRows(rowsValue);
     }
-}, DEBOUNCED_TIME), []);
+}, DEBOUNCED_TIME);
 
 const handleOnPrevClick = () => {
     if((currentPage-1) % pageNumberLimit === 0){
@@ -108,6 +108,7 @@ const handleOnPrevClick = () => {
 }
 
 const handleOnNextClick = () => {
+    console.log(banksData);
     if(currentPage+1 > maxPageLimit){
         setMaxPageLimit(maxPageLimit + pageNumberLimit);
         setMinPageLimit(minPageLimit + pageNumberLimit);
