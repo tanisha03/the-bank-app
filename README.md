@@ -1,8 +1,6 @@
-# Brew it
+# The Bank App
 
-Brewery search web app using React Js and the Open Brewery api.
-
-https://www.openbrewerydb.org/documentation
+Bank listing app
 
 ## Installation
 
