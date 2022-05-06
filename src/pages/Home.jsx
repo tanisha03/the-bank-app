@@ -101,6 +101,8 @@ const handleOnKeyUpRows = debouncedFunction((e) => {
     if(rowsValue && rowsValue < banksData.length) {
         setDisplayedBankData(banksData.slice(0, rowsValue));
         setCurrentPage(1);
+        setMaxPageLimit(10);
+        setMinPageLimit(0);
         setMaxRows(rowsValue);
     }
 }, DEBOUNCED_TIME);
