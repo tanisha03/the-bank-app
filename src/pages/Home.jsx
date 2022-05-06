@@ -147,20 +147,24 @@ const handleOnPageChange = (pageNumber) => {
            ( displayedBankData.length ? (
            <>
                 <Table columns={COLUMNS} data={displayedBankData} />
-                <div style={{marginTop: '16px', float: 'right'}}>
-                    <div>
-                        Rows: <input type="number" value={maxRows} onChange={e => setMaxRows(parseInt(e.target.value))} onKeyUp={handleOnKeyUpRows}/>
-                    </div>
-                    <Pagination 
-                        currentPage={currentPage} 
-                        maxPageLimit={maxPageLimit} 
-                        minPageLimit={minPageLimit} 
-                        totalPages={parseInt(banksData.length/maxRows) || 10}
-                        onPrevClick={handleOnPrevClick} 
-                        onNextClick={handleOnNextClick}
-                        onPageChange={handleOnPageChange}
-                    />
-                </div>
+                {
+                    banksData.length!==0 && (
+                        <div style={{marginTop: '16px', float: 'right'}}>
+                            <div>
+                                Rows: <input type="number" value={maxRows} onChange={e => setMaxRows(parseInt(e.target.value))} onKeyUp={handleOnKeyUpRows}/>
+                            </div>
+                            <Pagination 
+                                currentPage={currentPage} 
+                                maxPageLimit={maxPageLimit} 
+                                minPageLimit={minPageLimit} 
+                                totalPages={parseInt(banksData.length/maxRows)}
+                                onPrevClick={handleOnPrevClick} 
+                                onNextClick={handleOnNextClick}
+                                onPageChange={handleOnPageChange}
+                            />
+                        </div>
+                    )
+                }
            </>
         ) : ( <EmptyState/> ))}
     </>
