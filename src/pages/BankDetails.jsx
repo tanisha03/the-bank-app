@@ -14,6 +14,7 @@ export default function BankDetails() {
     const city = queryParams.get('city');
     if (state) setBanksData(state);
     else {
+      // if data not passed as state via router, do a fresh call
       setIsLoading(true);
       API.getBanks(city, 'IFSC', id)
       .then(res => {

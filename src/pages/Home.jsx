@@ -49,10 +49,15 @@ export default function Home() {
     !isCached && setIsLoading(true);
     API.getBanks(city, category, query)
     .then(res => {
-        const slicedRows = res.slice(0, maxRows);
+        const slicedRows = JSON.stringify(res.slice(0, maxRows));
+        const cachedData = localStorage.getItem(city);
         setBanksData(res);
-        setDisplayedBankData(slicedRows);
-        localStorage.setItem(city, JSON.stringify(slicedRows));
+        // check if the data is stale & then refresh
+        if(slicedRows!==cachedData) {
+            setDisplayedBankData(slicedRows);
+            localStorage.setItem(city, JSON.stringify(slicedRows));
+        }
+        // reset everything
         setCurrentPage(1);
         setIsLoading(false);
     })
@@ -64,6 +69,7 @@ export default function Home() {
     const newTimestamp = new Date().getTime().toString();
     const difference = (newTimestamp - oldTimestamp)/1000/60;
     if(difference > CACHE_MINUTES) {
+        // remove cached data from the storage after 40 minutes
         CITIES.map(city => localStorage.removeItem(city.value));
         localStorage.setItem('timestamp', new Date().getTime());
         setIsLoading(true);
@@ -71,6 +77,7 @@ export default function Home() {
   }, []);
 
  useEffect(() => {
+     // use cachedData for first render
     const cachedData = localStorage.getItem(selectedCity);
     cachedData && setDisplayedBankData(JSON.parse(cachedData));
     fetchResults(cachedData!==null, selectedCity);
@@ -81,6 +88,7 @@ export default function Home() {
 }
 
  const handleOnKeyUp = useCallback(debouncedFunction((e) => {
+    // debouncing for searching a query
     let searchedValue = e.target.value;
     if(searchedValue) {
         fetchResults(false, selectedCity, selectedCategory, searchedValue);
@@ -88,6 +96,7 @@ export default function Home() {
 }, DEBOUNCED_TIME), []);
 
 const handleOnKeyUpRows = debouncedFunction((e) => {
+    // change number of rows to be displayed
     let rowsValue = parseInt(e.target.value);
     if(rowsValue && rowsValue < banksData.length) {
         setDisplayedBankData(banksData.slice(0, rowsValue));
