@@ -147,7 +147,7 @@ const handleOnPageChange = (pageNumber) => {
                         currentPage={currentPage} 
                         maxPageLimit={maxPageLimit} 
                         minPageLimit={minPageLimit} 
-                        totalPages={parseInt(banksData.length/maxRows)}
+                        totalPages={parseInt(banksData.length/maxRows) || 10}
                         onPrevClick={handleOnPrevClick} 
                         onNextClick={handleOnNextClick}
                         onPageChange={handleOnPageChange}
