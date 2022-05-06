@@ -50,7 +50,6 @@ export default function Home() {
     API.getBanks(city, category, query)
     .then(res => {
         const slicedRows = res.slice(0, maxRows);
-        debugger
         setBanksData(res);
         setDisplayedBankData(slicedRows);
         localStorage.setItem(city, JSON.stringify(slicedRows));

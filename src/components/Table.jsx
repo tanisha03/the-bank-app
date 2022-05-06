@@ -27,10 +27,11 @@ const TableContainer = styled.table`
   }
 `;
 
-const Row = ({bank_name, ifsc, branch, bank_id, address, city}) => {
+const Row = (props) => {
     let navigate = useNavigate();
+    const {bank_name, ifsc, branch, bank_id, address, city} = props;
      return(
-     <tr onClick={() => navigate(`/bank-details/${ifsc}?city=${city}`)} style={{cursor: 'pointer'}}>
+     <tr onClick={() => navigate(`/bank-details/${ifsc}?city=${city}`, { state: props })} style={{cursor: 'pointer'}}>
         <td>{bank_name}</td>
         <td>{ifsc}</td>
         <td>{branch}</td>
