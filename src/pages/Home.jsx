@@ -110,7 +110,7 @@ const handleOnPrevClick = () => {
         setMaxPageLimit(maxPageLimit - pageNumberLimit);
         setMinPageLimit(minPageLimit - pageNumberLimit);
     }
-    const startIndex = (currentPage-1)*maxRows;
+    const startIndex = (currentPage-2)*maxRows;
     setDisplayedBankData(banksData.slice(startIndex, startIndex+maxRows));
     setCurrentPage(currentPage-1);
 }
