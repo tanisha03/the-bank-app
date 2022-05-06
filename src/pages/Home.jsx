@@ -52,7 +52,7 @@ export default function Home() {
         const slicedRows = res.slice(0, maxRows);
         setBanksData(res);
         setDisplayedBankData(slicedRows);
-        isCached && localStorage.setItem(city, JSON.stringify(slicedRows));
+        localStorage.setItem(city, JSON.stringify(slicedRows));
         setCurrentPage(1);
         setIsLoading(false);
     })
@@ -73,7 +73,7 @@ export default function Home() {
  useEffect(() => {
     const cachedData = localStorage.getItem(selectedCity);
     cachedData && setDisplayedBankData(JSON.parse(cachedData));
-    fetchResults(true, selectedCity);
+    fetchResults(cachedData!==null, selectedCity);
  }, [selectedCity]);
 
  const handleChange = (e) => {
